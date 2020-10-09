@@ -1,0 +1,35 @@
+#########
+
+données à prendre sur la feuille : plan_semis (colonne zone)
+
+4 bancs de germination qui contiennent plusieurs zones.
+On veut savoir si il y a un effet banc? Zone/caméra?
+Zone 1 nombre = banc -- 2 ème nombre = zone
+50 graines par zones
+
+
+données à prendre sur la feuille : TMG-TXX_rep
+
+TMG (temps moyen de gernimation)
+Ecart-type
+T10 (temps qu'a mit 10% à germer parmis la zone de 50)
+.
+.
+.
+T90
+
+/!\ Moyenner les répétitions de graines /!\
+laisser de coté le controle -> commencer a la ligne 18.
+######
+
+première réduction de dimension = T90 contient peut être trop de NaN du coup on va peut être la supprimé
+
+######
+
+Caractériser la vitesse de germination:
+
+T20-T10
+T20-T40 ...
+
+#####
+Présentation mathématiques rigoureuse + présentation visuelle (moins mathématiques)
