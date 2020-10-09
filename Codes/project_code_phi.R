@@ -40,7 +40,6 @@ df_features=cbind(df_features,Ecart40_50)
 df_features=cbind(df_features,Ecart50_60)
 df_features=cbind(df_features,Ecart60_70)
 df_features=cbind(df_features,Ecart70_80)
-df_features=cbind(df_features,Ecart80_90)
 
 #Données
 str(df_features)
@@ -80,12 +79,14 @@ boxplot(df_features$Ecart30_40[zone1],df_features$Ecart30_40[zone2],df_features$
 library(FactoMineR)
 library(factoextra)
 
-acp=PCA(df_features[,c(4,5,16,17,18,19,20,21,22)],quali.sup = c(df_features[,14],df_features[,15]))
+Sbanc = df_features$Banc
+SZone = df_features$Zone
 
-plot(acp)
-#, habillage = 'Banc')
-#, label=FALSE)
+data = df_features[,c(4,5,14,15,16,17,18,19,20,21,22)]
+
+acp = PCA(data, quali.sup = 3:4)
+plot(acp, habillage = 3, label = "none") #en fonction du banc sur lequel se trouve l'individu
+plot(acp, habillage = 4, label = "none") #en fonction de la zone sur laquelle se trouve l'individu
 
 ## Moyenner sur les répétitions
-## S'occuper des NaN sur les répétitions
-## ACP en colorant en fonction du banc puis de la zone
+## Analyse acp avec axes, cos2, et ellipse de confiance, interprétation
