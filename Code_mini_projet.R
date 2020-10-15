@@ -139,9 +139,55 @@ plot(acp, habillage = 4, label = "none") #en fonction de la zone sur laquelle se
 ## Moyenner sur les répétitions
 ## Analyse acp avec axes, cos2, et ellipse de confiance, interprétation
 
+
+##### ACP 3D
+library(rgl)
+FMacp3d<-function(PCA.res, comp=1:3, group, plotVars = FALSE,  
+                  pointSize=2, plotText=FALSE){
+  if(!require("rgl")) stop("You must install rgl");
+  if(length(comp)!=3) stop("You must give a vector of 3 integer for comp parameter")
+  if(!plotVars){
+    x<-PCA.res$ind$coord
+  }else{
+    x<-PCA.res$var$coord
+  }
+  if(is.null(levels(group))){ colors="black"}
+  else{
+    hashCol<-rainbow(nlevels(group))
+    names(hashCol)<-levels(group)
+    colors<-hashCol[group]
+  }
+  
+  percentVar <- PCA.res$eig[,"percentage of variance"]
+  plot3d(x[,comp[1]],x[,comp[2]],x[,comp[3]],
+         xlab=paste0("PC",comp[1],": ",round(percentVar[comp[1]] ),"%"), 
+         ylab=paste0("PC",comp[2],": ",round(percentVar[comp[2]] ),"%"), 
+         zlab=paste0("PC",comp[3],": ",round(percentVar[comp[3]] ),"%"),
+         col=colors,size=5,type=ifelse(plotText,"n","p"),box = FALSE)
+  
+  legend3d("topright", legend = names(hashCol), pch = 16, col = hashCol, 
+           cex=1, inset=c(0.02),bty="n", ncol = 1)   #grandir le cadre et rerunner pour avoir une legend a la bonne taille
+  
+  if(plotText) text3d(x[,comp[1]],x[,comp[2]],x[,comp[3]],texts=rownames(x),cex=pointSize,col=colors)
+  if(plotVars) spheres3d(x=0,y=0,z=0, radius = 1,alpha=0.5,color="white")
+  spheres3d(x=0,y=0,z=0, radius = 0.005,alpha=1,color="red")
+} # fin de la fonction 
+
+par3d(cex=0.7)  #par3d -> pour la taille de police
+
+### ACP 3D BANC
+FMacp3d(PCA.res=acp, comp=1:3, group=as.factor(data[,3]), plotVars = FALSE,    #important que group soit en factor 
+        pointSize=2, plotText=FALSE)
+### ACP 3D ZONE
+FMacp3d(PCA.res=acp, comp=1:3, group=as.factor(data[,4]), plotVars = FALSE,    #important que group soit en factor 
+        pointSize=2, plotText=FALSE)
+
+
 library(umap)
 str(as.matrix(df_features[,c(4,5,14,15,16,17,18,19,20,21,22)]))
 U=umap(df_features[,c(4,5,16,17,18,19,20,21,22)])
 plot(U.layout)
 plot(U$layout,col=df_features[,14])
 plot(U$layout,col=df_features[,15])
+
+
