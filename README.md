@@ -4,5 +4,6 @@ To Do List
 
 - [x] Présentation de la méthode UMAP en version mathématique
 - [x] Présentation de la méthode UMAP 'avec les mains'
-- [ ] Implémenter la méthode avec nos données (sur Python ou R)
+- [ ] Interprétation ACP (2D 3D) et sur données nettoyées et données moyennées (R)
+- [ ] Implémenter la méthode avec nos données (sur Python ou R), tester différentes métriques et nombre de voisins
 - [ ] Mettre les explications et graphiques en forme dans un PowerPoint
