@@ -1,89 +1,218 @@
 ## Ouverture du fichier excel
 library(readxl)
 
-plan_semis=read_excel('/users/2021ds/116000961/Documents/Projet_data_visualisation/donnees.xlsx', sheet=9)
-df=read_excel('/users/2021ds/116000961/Documents/Projet_data_visualisation/donnees.xlsx', sheet=7)
+file = '/users/2021ds/116000961/Documents/Projet_data_visualisation/clean_data.xlsx'
+plan_semis=read_excel(file, sheet=9)
+features=read_excel(file, sheet=7)
 
-## On enlève ce qui est pas utile
-df=df[17:nrow(df),]
-plan_semis=plan_semis[17:nrow(plan_semis),]
+## On enlève ce qui est pas utile (le contrôle)
+df_features=features[17:nrow(features),]
+df_semis=plan_semis[17:nrow(plan_semis),c(1,5,6)]
 
-#On rajoute une colonne banc et zone
+#On rajoute une colonne banc et zone au df_features
 
-Banc=plan_semis$zone%/%10
-Zone=plan_semis$zone%%10
-df=cbind(df,Banc)
-df=cbind(df,Zone)
+Banc=df_semis$zone%/%10
+Zone=df_semis$zone%%10
+df_features=cbind(df_features,Banc)
+df_features=cbind(df_features,Zone)
 
 #On modifie le type des données
-df$T10=as.numeric(df$T10)
-df$T20=as.numeric(df$T20)
-df$T30=as.numeric(df$T30)
-df$T40=as.numeric(df$T40)
-df$T50=as.numeric(df$T50)
-df$T60=as.numeric(df$T60)
-df$T70=as.numeric(df$T70)
-df$T80=as.numeric(df$T80)
-df$T90=as.numeric(df$T90)
-
-#On calcule les écarts et on les ajoutes dans df
-Ecart10_20=df$T20-df$T10
-Ecart20_30=df$T30-df$T20
-Ecart30_40=df$T40-df$T30
-Ecart40_50=df$T50-df$T40
-Ecart50_60=df$T60-df$T50
-Ecart60_70=df$T70-df$T60
-Ecart70_80=df$T80-df$T70
-Ecart80_90=df$T90-df$T80
-
-df=cbind(df,Ecart10_20)
-df=cbind(df,Ecart20_30)
-df=cbind(df,Ecart30_40)
-df=cbind(df,Ecart40_50)
-df=cbind(df,Ecart50_60)
-df=cbind(df,Ecart60_70)
-df=cbind(df,Ecart70_80)
-df=cbind(df,Ecart80_90)
+str(df_semis)
+str(df_features)
 
 
-#On regarde via des boxplots si on peut voir des différences de banc
-banc1=which(df$Banc==1)
-banc2=which(df$Banc==2)
-banc3=which(df$Banc==3)
-banc4=which(df$Banc==4)
+## On supprime les répétitions
+ligne=1
+while (ligne <nrow(df_features) ){
+  j=ligne
+  while((df_features[ligne,1]==df_features[j+1,1]) & ((j+1)<=nrow(df_features))){
+    j=j+1
+  }
+  #print(df_features[j,1])
+  if (df_features[ligne,1]==df_features[ligne+1,1]){
+    df_features[ligne,4]=sum(df_features[ligne:j,4])/(j+1-ligne)
+    df_features[ligne,5]=sum(df_features[ligne:j,5])/(j+1-ligne)
+    df_features[ligne,6]=sum(df_features[ligne:j,6])/(j+1-ligne)
+    df_features[ligne,7]=sum(df_features[ligne:j,7])/(j+1-ligne)
+    df_features[ligne,8]=sum(df_features[ligne:j,8])/(j+1-ligne)
+    df_features[ligne,9]=sum(df_features[ligne:j,9])/(j+1-ligne)
+    df_features[ligne,10]=sum(df_features[ligne:j,10])/(j+1-ligne)
+    df_features[ligne,11]=sum(df_features[ligne:j,11])/(j+1-ligne)
+    df_features[ligne,12]=sum(df_features[ligne:j,12])/(j+1-ligne)
+    df_features[ligne,13]=sum(df_features[ligne:j,13])/(j+1-ligne)
+   
+     for (k in j:(ligne+1)){
+      df_features=df_features[-k,]
+    }
+  }
+  ligne=ligne+1
+}
 
-boxplot(df$Ecart50_60[banc1],df$Ecart50_60[banc2],df$Ecart50_60[banc3],df$Ecart50_60[banc4])
-boxplot(df$Ecart30_40[banc1],df$Ecart30_40[banc2],df$Ecart30_40[banc3],df$Ecart30_40[banc4])
-boxplot(df$TMG[banc1],df$TMG[banc2],df$TMG[banc3],df$TMG[banc4])
 
-plot(df$banc[banc1],df$Ecart50_60[banc1],col='1')
-points(df$Ecart50_60[banc2],col='2')
-points(df$Ecart50_60[banc3],col='3')
-points(df$Ecart50_60[banc4],col='4')
+##features
+df_features$Banc = as.factor(df_features$Banc)
+df_features$Zone = as.factor(df_features$Zone)
+
+#On calcule les écarts et on les ajoutes dans df_features
+Ecart10_20=df_features$T20-df_features$T10
+Ecart20_30=df_features$T30-df_features$T20
+Ecart30_40=df_features$T40-df_features$T30
+Ecart40_50=df_features$T50-df_features$T40
+Ecart50_60=df_features$T60-df_features$T50
+Ecart60_70=df_features$T70-df_features$T60
+Ecart70_80=df_features$T80-df_features$T70
+
+df_features=cbind(df_features,Ecart10_20)
+df_features=cbind(df_features,Ecart20_30)
+df_features=cbind(df_features,Ecart30_40)
+df_features=cbind(df_features,Ecart40_50)
+df_features=cbind(df_features,Ecart50_60)
+df_features=cbind(df_features,Ecart60_70)
+df_features=cbind(df_features,Ecart70_80)
+
+#Données
+str(df_features)
+summary(df_features)
+
+str(df_semis)
+summary(df_semis)
+
+#On regarde via des boxplots si on peut déjà voir des effets des bancs sur la vitesse de germination
+banc1=which(df_features$Banc==1)
+banc2=which(df_features$Banc==2)
+banc3=which(df_features$Banc==3)
+banc4=which(df_features$Banc==4)
+
+layout(matrix(c(1:8), nrow=2, ncol=4, byrow=TRUE))
+boxplot(df_features$TMG[banc1],df_features$TMG[banc2],df_features$TMG[banc3],df_features$TMG[banc4], main='TMG')
+boxplot(df_features$Ecart10_20[banc1],df_features$Ecart10_20[banc2],df_features$Ecart10_20[banc3],df_features$Ecart10_20[banc4],ylim=c(0,60),main='Ecart 10-20')
+boxplot(df_features$Ecart20_30[banc1],df_features$Ecart20_30[banc2],df_features$Ecart20_30[banc3],df_features$Ecart20_30[banc4],ylim=c(0,60),main='Ecart 20-30')
+boxplot(df_features$Ecart30_40[banc1],df_features$Ecart30_40[banc2],df_features$Ecart30_40[banc3],df_features$Ecart30_40[banc4],ylim=c(0,60),main='Ecart 30-40')
+boxplot(df_features$Ecart40_50[banc1],df_features$Ecart40_50[banc2],df_features$Ecart40_50[banc3],df_features$Ecart40_50[banc4],ylim=c(0,60),main='Ecart 40-50')
+boxplot(df_features$Ecart50_60[banc1],df_features$Ecart50_60[banc2],df_features$Ecart50_60[banc3],df_features$Ecart50_60[banc4],ylim=c(0,60),main='Ecart 50-60')
+boxplot(df_features$Ecart60_70[banc1],df_features$Ecart60_70[banc2],df_features$Ecart60_70[banc3],df_features$Ecart60_70[banc4],ylim=c(0,60),main='Ecart 60-70')
+boxplot(df_features$Ecart70_80[banc1],df_features$Ecart70_80[banc2],df_features$Ecart70_80[banc3],df_features$Ecart70_80[banc4],ylim=c(0,60),main='Ecart 70-80')
+
+
+
+
 
 
 #On regarde via des boxplots si on peut voir des différences de zone
-zone1=which(df$Zone==1)
-zone2=which(df$Zone==2)
-zone3=which(df$Zone==3)
-zone4=which(df$Zone==4)
-boxplot(df$TMG[zone1],df$TMG[zone2],df$TMG[zone3],df$TMG[zone4])
-boxplot(df$Ecart30_40[zone1],df$Ecart30_40[zone2],df$Ecart30_40[zone3],df$Ecart30_40[zone4])
+zone1=which(df_features$Zone==1)
+zone2=which(df_features$Zone==2)
+zone3=which(df_features$Zone==3)
+zone4=which(df_features$Zone==4)
 
 
 
+layout(matrix(c(1:8), nrow=2, ncol=4, byrow=TRUE))
+boxplot(df_features$TMG[zone1],df_features$TMG[zone2],df_features$TMG[zone3],df_features$TMG[zone4], main='TMG')
+boxplot(df_features$Ecart10_20[zone1],df_features$Ecart10_20[zone2],df_features$Ecart10_20[zone3],df_features$Ecart10_20[zone4],ylim=c(0,60),main='Ecart 10-20')
+boxplot(df_features$Ecart20_30[zone1],df_features$Ecart20_30[zone2],df_features$Ecart20_30[zone3],df_features$Ecart20_30[zone4],ylim=c(0,60),main='Ecart 20-30')
+boxplot(df_features$Ecart30_40[zone1],df_features$Ecart30_40[zone2],df_features$Ecart30_40[zone3],df_features$Ecart30_40[zone4],ylim=c(0,60),main='Ecart 30-40')
+boxplot(df_features$Ecart40_50[zone1],df_features$Ecart40_50[zone2],df_features$Ecart40_50[zone3],df_features$Ecart40_50[zone4],ylim=c(0,60),main='Ecart 40-50')
+boxplot(df_features$Ecart50_60[zone1],df_features$Ecart50_60[zone2],df_features$Ecart50_60[zone3],df_features$Ecart50_60[zone4],ylim=c(0,60),main='Ecart 50-60')
+boxplot(df_features$Ecart60_70[zone1],df_features$Ecart60_70[zone2],df_features$Ecart60_70[zone3],df_features$Ecart60_70[zone4],ylim=c(0,60),main='Ecart 60-70')
+boxplot(df_features$Ecart70_80[zone1],df_features$Ecart70_80[zone2],df_features$Ecart70_80[zone3],df_features$Ecart70_80[zone4],ylim=c(0,60),main='Ecart 70-80')
+dev.off()
+
+#Réduction de dimension par ACP
 
 library(FactoMineR)
-df$Banc=as.factor(df$Banc)
-df$Zone=as.factor(df$Zone)
-acp=PCA(df[,c(4,14,17,18,19,20,21,22)],quali.sup = c(df[,15],df[,16]))
-plot(acp)
-#, habillage = 'Banc')
-#, label=FALSE)
+library(factoextra)
 
+Sbanc = df_features$Banc
+SZone = df_features$Zone
+
+data = df_features[,c(4,5,14,15,16,17,18,19,20,21,22)]
+
+acp = PCA(data, quali.sup = 3:4)
+plot(acp, habillage = 3, label = "none") #en fonction du banc sur lequel se trouve l'individu
+plot(acp, habillage = 4, label = "none") #en fonction de la zone sur laquelle se trouve l'individu
+#fviz_eig(acp,label=TRUE)
+#fviz_contrib(acp,choice = "var",axes = 1:2)
 ## Moyenner sur les répétitions
-## S'occuper des NaN sur les répétitions
-## ACP en colorant en fonction du banc puis de la zone
+## Analyse acp avec axes, cos2, et ellipse de confiance, interprétation
+
+
+##### ACP 3D
+library(rgl)
+FMacp3d<-function(PCA.res, comp=1:3, group, plotVars = FALSE,  
+                  pointSize=2, plotText=FALSE){
+  if(!require("rgl")) stop("You must install rgl");
+  if(length(comp)!=3) stop("You must give a vector of 3 integer for comp parameter")
+  if(!plotVars){
+    x<-PCA.res$ind$coord
+  }else{
+    x<-PCA.res$var$coord
+  }
+  if(is.null(levels(group))){ colors="black"}
+  else{
+    hashCol<-rainbow(nlevels(group))
+    names(hashCol)<-levels(group)
+    colors<-hashCol[group]
+  }
+  
+  percentVar <- PCA.res$eig[,"percentage of variance"]
+  plot3d(x[,comp[1]],x[,comp[2]],x[,comp[3]],
+         xlab=paste0("PC",comp[1],": ",round(percentVar[comp[1]] ),"%"), 
+         ylab=paste0("PC",comp[2],": ",round(percentVar[comp[2]] ),"%"), 
+         zlab=paste0("PC",comp[3],": ",round(percentVar[comp[3]] ),"%"),
+         col=colors,size=5,type=ifelse(plotText,"n","p"),box = FALSE)
+  
+  legend3d("topright", legend = names(hashCol), pch = 16, col = hashCol, 
+           cex=1, inset=c(0.02),bty="n", ncol = 1)   #grandir le cadre et rerunner pour avoir une legend a la bonne taille
+  
+  if(plotText) text3d(x[,comp[1]],x[,comp[2]],x[,comp[3]],texts=rownames(x),cex=pointSize,col=colors)
+  if(plotVars) spheres3d(x=0,y=0,z=0, radius = 1,alpha=0.5,color="white")
+  spheres3d(x=0,y=0,z=0, radius = 0.005,alpha=1,color="red")
+} # fin de la fonction 
+
+par3d(cex=0.7)  #par3d -> pour la taille de police
+
+### ACP 3D BANC
+FMacp3d(PCA.res=acp, comp=1:3, group=as.factor(data[,3]), plotVars = FALSE,    #important que group soit en factor 
+        pointSize=2, plotText=FALSE)
+### ACP 3D ZONE
+FMacp3d(PCA.res=acp, comp=1:3, group=as.factor(data[,4]), plotVars = FALSE,    #important que group soit en factor 
+        pointSize=2, plotText=FALSE)
+
+
+library(umap)
+str(as.matrix(df_features[,c(4,5,14,15,16,17,18,19,20,21,22)]))
+umap_par=umap.defaults
+umap_par$n_neighbors=5
+umap_par$min_dist=0.1
+umap_par$metric='euclidean' #'manhattan'
+umap_par$metric='manhattan'
+umap_par$metric='pearson2'
+
+
+umap_par$verbose=TRUE
+umap_par$n_components=2
+
+## Test min_dist
+layout(matrix(c(1:8), nrow=2, ncol=3, byrow=TRUE))
+for (i in c(0.05, 0.1, 0.25, 0.5, 0.8, 0.99)){
+  umap_par$min_dist=i
+  U=umap(df_features[,c(4,5,16,17,18,19,20,21,22)],config = umap_par)
+  plot(U$layout,col=df_features[,14],xlab = 'Dim1',ylab = 'Dim2')
+}
+
+## Test n_neighbors
+layout(matrix(c(1:6), nrow=2, ncol=3, byrow=TRUE))
+for (i in c(2, 5, 10, 20, 50, 100)){
+  umap_par$n_neighbors=i
+  U=umap(df_features[,c(4,5,16,17,18,19,20,21,22)],config = umap_par,xlab = 'Dim1',ylab = 'Dim2')
+  plot(U$layout,col=df_features[,14])
+}
+
+
+
+#plot(U$layout)
+
+plot(U$layout,col=df_features[,15])
 
 
 
