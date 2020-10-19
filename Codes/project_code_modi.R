@@ -5,85 +5,93 @@ file = 'clean_data.xlsx'
 plan_semis=read_excel(file, sheet=9)
 features=read_excel(file, sheet=7)
 
-## On enlève ce qui est pas utile (le contrôle)
+## On enlève ce qui est pas utile
+###controle
 df_features=features[17:nrow(features),]
-df_semis=plan_semis[17:nrow(plan_semis),c(1,3,4,5)]
+df_semis=plan_semis[17:nrow(plan_semis),c(1,3,5)]
 
-#On rajoute les colonnes banc, camera et zone au df_features pour tout avoir sur un seul df
+#banc 2
+Banc2 = which(df_semis$Banc == 2)
+df_semis_mod = df_semis[Banc2,]
+df_f = df_features[Banc2,]
+n = dim(df_semis_mod)[1]
+Zone = rep(0,n)
 
-df_features=cbind(df_features,df_semis[,2])
-df_features=cbind(df_features,df_semis[,3])
-df_features=cbind(df_features,df_semis[,4])
+for (i in 1:n){
+  if (df_semis_mod$zone[i] == 11 |df_semis_mod$zone[i] == 12 |df_semis_mod$zone[i] == 21 |df_semis_mod$zone[i] == 22){
+    Zone[i] = 1
+  }
+  if (df_semis_mod$zone[i] == 13 |df_semis_mod$zone[i] == 14 |df_semis_mod$zone[i] == 23 |df_semis_mod$zone[i] == 24){
+    Zone[i] = 2
+  }
+  if (df_semis_mod$zone[i] == 31 |df_semis_mod$zone[i] == 32 |df_semis_mod$zone[i] == 41 |df_semis_mod$zone[i] == 42){
+    Zone[i] = 3
+  }
+  if (df_semis_mod$zone[i] == 33 |df_semis_mod$zone[i] == 34 |df_semis_mod$zone[i] == 43 |df_semis_mod$zone[i] == 44){
+    Zone[i] = 4
+  }
+}
+
+#On rajoute la colonne zone au df_features pour tout avoir sur un seul df
+
+df_f=cbind(df_f,Zone)
 
 
 #On modifie le type des données
-str(df_features)
-df_features$Banc = as.factor(df_features$Banc)
-df_features$Camera = as.factor(df_features$Camera)
-df_features$zone = as.factor(df_features$zone)
+str(df_f)
+df_f$Zone = as.factor(df_f$Zone)
 
 #affichage des répartitions des données en fonction des bancs, camera et zones
-summary(df_features$Banc)       #376 échantillons sur le banc 2 et 33 sur le banc 4
-summary(df_features$Camera)     #393 données sous la caméra 4 (banc 2 et 4) et 16 sous la caméra 0 (banc 2 et 4)
-summary(df_features$zone)       # répartition équitbale en fonction des zones
+summary(df_f$Zone)       # répartition équitbale en fonction des zones
 
 
 #On calcule les écarts et on les ajoutes dans df_features (cinétiques)
-Ecart10_20=df_features$T20-df_features$T10
-Ecart20_30=df_features$T30-df_features$T20
-Ecart30_40=df_features$T40-df_features$T30
-Ecart40_50=df_features$T50-df_features$T40
-Ecart50_60=df_features$T60-df_features$T50
-Ecart60_70=df_features$T70-df_features$T60
-Ecart70_80=df_features$T80-df_features$T70
+Ecart10_20=df_f$T20-df_f$T10
+Ecart20_30=df_f$T30-df_f$T20
+Ecart30_40=df_f$T40-df_f$T30
+Ecart40_50=df_f$T50-df_f$T40
+Ecart50_60=df_f$T60-df_f$T50
+Ecart60_70=df_f$T70-df_f$T60
+Ecart70_80=df_f$T80-df_f$T70
 
-df_features=cbind(df_features,Ecart10_20)
-df_features=cbind(df_features,Ecart20_30)
-df_features=cbind(df_features,Ecart30_40)
-df_features=cbind(df_features,Ecart40_50)
-df_features=cbind(df_features,Ecart50_60)
-df_features=cbind(df_features,Ecart60_70)
-df_features=cbind(df_features,Ecart70_80)
+df_f=cbind(df_f,Ecart10_20)
+df_f=cbind(df_f,Ecart20_30)
+df_f=cbind(df_f,Ecart30_40)
+df_f=cbind(df_f,Ecart40_50)
+df_f=cbind(df_f,Ecart50_60)
+df_f=cbind(df_f,Ecart60_70)
+df_f=cbind(df_f,Ecart70_80)
 
 #Données
-str(df_features)
-summary(df_features)
-
-#On regarde via des boxplots si on peut déjà voir des effets des bancs sur la vitesse de germination
-banc2=which(df_features$Banc==2)
-banc4=which(df_features$Banc==4)
-
-boxplot(df_features$Ecart50_60[banc2],df_features$Ecart50_60[banc4])
-boxplot(df_features$Ecart30_40[banc2],df_features$Ecart30_40[banc4])
-boxplot(df_features$TMG[banc2],df_features$TMG[banc4]) #écart de TMG entre les 2 bancs mais sûrement biaisé du au problème de répartition des données
+str(df_f)
+summary(df_f)
+df_features = df_f[,c(1,4,5,14,15,16,17,18,19,20,21)]
 
 #On regarde via des boxplots si on peut voir des différences de zone
-zone11=which(df_features$zone==11)
-zone12=which(df_features$zone==12)
-zone13=which(df_features$zone==13)
-zone14=which(df_features$zone==14)
+zone1=which(df_features$Zone==1)
+zone2=which(df_features$Zone==2)
+zone3=which(df_features$Zone==3)
+zone4=which(df_features$Zone==4)
 
-boxplot(df_features$TMG[zone11],df_features$TMG[zone12],df_features$TMG[zone13],df_features$TMG[zone14])
-boxplot(df_features$Ecart30_40[zone11],df_features$Ecart30_40[zone12],df_features$Ecart30_40[zone13],df_features$Ecart30_40[zone14])
+boxplot(df_features$TMG[zone1],df_features$TMG[zone2],df_features$TMG[zone3],df_features$TMG[zone4])
+boxplot(df_features$Ecart30_40[zone1],df_features$Ecart30_40[zone2],df_features$Ecart30_40[zone3],df_features$Ecart30_40[zone4])
 
 #Réduction de dimension par ACP
 
 library(FactoMineR)
 library(factoextra)
 library(corrplot)
-library(ade4)
-library(ggplot2)
 
 
-data = df_features[,c(4,5,14,15,16,17,18,19,20,21,22,23)]
-corrplot(cor(data[, -c(3,4,5)]))   #pas de corrélation flagrante et porteuse de sens
+data = df_features[,-c(1)]
+corrplot(cor(data[, -c(3)]))   #pas de corrélation flagrante et porteuse de sens
 
 
-acp = PCA(data, quali.sup = 3:5)
-plot(acp, habillage = 3, label = "none") #en fonction du banc sur lequel se trouve l'individu
-plot(acp, habillage = 4, label = "none") #en fonction de la camera sous laquelle se trouve l'individu
-plot(acp, habillage = 5, label = "none") #en fonction de la zone dans laquelle se trouve l'individu
+acp = PCA(data, quali.sup = 3)
+plot(acp, habillage = 3, label = "none") #en fonction de la zone dans laquelle se trouve l'individu
 
-plotellipses(acp, keepvar = 3:5, level=0.95) #pas ouf comme ellipse
+plotellipses(acp, keepvar = 3, level=0.95, label = "none") #pas ouf comme ellipse
+
+write.csv(x = df_features, file = "dataframe_to_mean.csv")
 
 ## Analyse acp avec interprétation
