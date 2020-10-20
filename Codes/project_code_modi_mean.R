@@ -18,13 +18,23 @@ summary(data)
 
 
 #On regarde via des boxplots si on peut voir des différences de zone
-zone1=which(data$Zone==1)
-zone2=which(data$Zone==2)
-zone3=which(data$Zone==3)
-zone4=which(data$Zone==4)
+zone1=which(df_features$Zone==1)
+zone2=which(df_features$Zone==2)
+zone3=which(df_features$Zone==3)
+zone4=which(df_features$Zone==4)
 
-#faire le layout de nolwenn
-boxplot(data$TMG[zone1],data$TMG[zone2],data$TMG[zone3],data$TMG[zone4])
+
+
+layout(matrix(c(1:8), nrow=2, ncol=4, byrow=TRUE))
+boxplot(df_features$TMG[zone1],df_features$TMG[zone2],df_features$TMG[zone3],df_features$TMG[zone4], main='TMG')
+boxplot(df_features$Ecart10_20[zone1],df_features$Ecart10_20[zone2],df_features$Ecart10_20[zone3],df_features$Ecart10_20[zone4],ylim=c(0,60),main='Ecart 10-20')
+boxplot(df_features$Ecart20_30[zone1],df_features$Ecart20_30[zone2],df_features$Ecart20_30[zone3],df_features$Ecart20_30[zone4],ylim=c(0,60),main='Ecart 20-30')
+boxplot(df_features$Ecart30_40[zone1],df_features$Ecart30_40[zone2],df_features$Ecart30_40[zone3],df_features$Ecart30_40[zone4],ylim=c(0,60),main='Ecart 30-40')
+boxplot(df_features$Ecart40_50[zone1],df_features$Ecart40_50[zone2],df_features$Ecart40_50[zone3],df_features$Ecart40_50[zone4],ylim=c(0,60),main='Ecart 40-50')
+boxplot(df_features$Ecart50_60[zone1],df_features$Ecart50_60[zone2],df_features$Ecart50_60[zone3],df_features$Ecart50_60[zone4],ylim=c(0,60),main='Ecart 50-60')
+boxplot(df_features$Ecart60_70[zone1],df_features$Ecart60_70[zone2],df_features$Ecart60_70[zone3],df_features$Ecart60_70[zone4],ylim=c(0,60),main='Ecart 60-70')
+boxplot(df_features$Ecart70_80[zone1],df_features$Ecart70_80[zone2],df_features$Ecart70_80[zone3],df_features$Ecart70_80[zone4],ylim=c(0,60),main='Ecart 70-80')
+dev.off()
 
 
 #Réduction de dimension par ACP
@@ -40,6 +50,14 @@ acp_moy = PCA(data_acp, quali.sup = 3)
 plot(acp_moy, habillage = 3, label = "none") #en fonction de la zone dans laquelle se trouve l'individu
 
 plotellipses(acp_moy, keepvar = 3, level=0.95, label = "none") #peut être un effet de la zone 14
+
+fviz_contrib(acp_moy,choice = "var",axes = 1:2)
+fviz_eig(acp_moy,label=TRUE)
+
+## Test
+acp_moy2 = PCA(data_acp[,c(1,2,3,9)], quali.sup = 3)
+plot(acp_moy2,habillage = 3, label = "none")
+plotellipses(acp_moy2, keepvar = 3, level=0.95, label = "none")
 
 #ACP 3D
 
@@ -81,6 +99,11 @@ par3d(cex=0.5)  #par3d -> pour la taille de police
 FMacp3d(PCA.res=acp_moy, comp=1:3, group=as.factor(data[,4]), plotVars = FALSE,    #important que group soit en factor 
         pointSize=2, plotText=FALSE)
 
+## ACP 3D ZONE (réduit)
+FMacp3d(PCA.res=acp_moy2, comp=1:3, group=as.factor(data[,4]), plotVars = FALSE,    #important que group soit en factor 
+        pointSize=2, plotText=FALSE)
+
+
 ## pas beaucoup plus de séparation des points qu'en 2D
 
 #UMAP
@@ -90,4 +113,36 @@ library(umap)
 Umap.data=umap(data[,-c(1,4)])
 plot(Umap.data$layout, col = data[,4]) # différence de zone
 
-#Adapter les métriques et les plus proches voisins
+#Paramètres par défaut
+umap_par=umap.defaults
+umap_par$n_neighbors=5
+umap_par$min_dist=0.25
+umap_par$metric='euclidean'
+
+
+
+# umap_par$metric='cosine'
+# umap_par$n_neighbors=5
+# umap_par$min_dist=0.1
+# 
+# umap_par$metric='pearson2'
+# umap_par$min_dist=0.1
+# umap_par$n_neighbors=5
+
+umap_par$verbose=TRUE
+
+## Test min_dist
+layout(matrix(c(1:6), nrow=2, ncol=3, byrow=TRUE))
+for (i in c(0.05, 0.1, 0.25, 0.5, 0.8, 0.99)){
+  umap_par$min_dist=i
+  U=umap(df_features[,c(4,5,16,17,18,19,20,21,22)],config = umap_par)
+  plot(U$layout,col=df_features[,14],xlab = 'Dim1',ylab = 'Dim2',pch=20)
+}
+
+## Test n_neighbors
+layout(matrix(c(1:6), nrow=2, ncol=3, byrow=TRUE))
+for (i in c(2, 5, 10, 20, 50, 100)){
+  umap_par$n_neighbors=i
+  U=umap(df_features[,c(4,5,16,17,18,19,20,21,22)],config = umap_par,xlab = 'Dim1',ylab = 'Dim2')
+  plot(U$layout,col=df_features[,14],pch=20)
+}
